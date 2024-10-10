@@ -1,0 +1,11 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      - PORT=${PORT}
+      - BASE_DIR=${BASE_DIR}
+    volumes:
+      - ./docker:/usr/src/app/docker
+    command: npm run start
