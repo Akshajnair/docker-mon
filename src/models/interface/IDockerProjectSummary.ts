@@ -1,7 +1,6 @@
 import DockerCompose from "./IDockerCompose";
 
-export default interface IDockerProject {
+export default interface IDockerProjectSummary {
     name: string;
     folderName: string;
-    dockerCompose: DockerCompose;
 }

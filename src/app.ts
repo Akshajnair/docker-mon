@@ -7,7 +7,7 @@ import errorHandler from './middleware/ErrorHandlerMiddleware';
 // Controllers
 import fileController from './controllers/FileController';
 import pingController from './controllers/PingController';
-import dashboardController from './controllers/DashboardController';
+import dockerController from './controllers/DockerController';
 import projectController from './controllers/ProjectController';
 
 
@@ -19,7 +19,7 @@ app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // init Controllers
 app.use('/api/ping', pingController);
-app.use('/api/dashboard', dashboardController);
+app.use('/api/docker', dockerController);
 app.use('/api/Project', projectController);
 app.use('/api/files', fileController);
 

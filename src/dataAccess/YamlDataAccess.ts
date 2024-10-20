@@ -4,6 +4,7 @@ import NotFoundError from '../errors/NotFoundError';
 import * as yaml from 'js-yaml';
 import DockerCompose from '../models/DockerCompose';
 import IDockerCompose from '../models/interface/IDockerCompose';
+import { BASE_DIR } from '../shared/Constants';
 
 
 function getProjectYaml(yamlLocation: string): DockerCompose {
@@ -23,4 +24,10 @@ function updateProjectYaml(yamlLocation: string, updatedDockerCompose: IDockerCo
     throw new NotFoundError("Yaml not found.");
 };
 
-export { getProjectYaml, updateProjectYaml }
+function createProjectYaml(projectFolderName: string): void {
+    const newDockerCompose = new DockerCompose({});
+    const yamlStr = yaml.dump(newDockerCompose);
+    fs.writeFileSync(`${BASE_DIR}/${projectFolderName}/docker-compose.yml`, yamlStr, 'utf8');
+};
+
+export { getProjectYaml, updateProjectYaml, createProjectYaml }
