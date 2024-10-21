@@ -2,7 +2,7 @@ import fs from 'fs';
 import { BASE_DIR } from '../shared/Constants';
 import { getAllFilesFolderInDirectory } from '../shared/utils/FileUtilities';
 import DockerProject from '../models/interface/IDockerProject';
-import { deserializeFolderName } from '../shared/utils/stringUtilities';
+import { deserializeFolderName } from '../shared/utils/StringUtilities';
 import NotFoundError from '../errors/NotFoundError';
 import { getProjectYaml } from './YamlDataAccess';
 
