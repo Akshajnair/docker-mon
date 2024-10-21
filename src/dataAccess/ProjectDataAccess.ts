@@ -40,6 +40,7 @@ function newProject(projectName: string): boolean {
     if (!fs.existsSync(`${BASE_DIR}/${serializedProjectName}`)) {
         try {
             fs.mkdirSync(`${BASE_DIR}/${serializedProjectName}`, { recursive: true });
+            console.log(`Folder created at ${BASE_DIR}/${serializedProjectName}`);
             createProjectYaml(serializedProjectName);
         } catch (err) {
             throw ('Error creating Project');
