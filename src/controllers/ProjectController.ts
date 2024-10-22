@@ -1,8 +1,10 @@
 import { Router, Request, Response } from 'express';
-import { addProject, getAllProjectList, getProjectDetails } from '../services/ProjectService';
-import validateUserData from '../validators/CreateProjectValidator';
+import { addProject, getAllProjectList, getProjectDetails, renameProject } from '../services/ProjectService';
+import createProjectValidator from '../validators/CreateProjectValidator';
+import renameProjectValidator from '../validators/RenameProjectValidator';
 
 const router = Router();
+
 
 // Handle a GET request to list all files
 router.get('/', (req: Request, res: Response) => {
@@ -15,10 +17,17 @@ router.get('/:folderName', (req: Request, res: Response) => {
   res.json(getProjectDetails(folderName))
 });
 
-router.post('/create', validateUserData, (req: Request, res: Response) => {
+router.post('/create', createProjectValidator, (req: Request, res: Response) => {
   const { projectName } = req.body;
   if (addProject(projectName)) {
     res.status(201).json("Project Created successfully.")
+  }
+});
+
+router.post('/rename', renameProjectValidator, (req: Request, res: Response) => {
+  const { projectName, newProjectName } = req.body;
+  if (renameProject(projectName, newProjectName)) {
+    res.status(201).json("Project Renamed successfully.")
   }
 });
 

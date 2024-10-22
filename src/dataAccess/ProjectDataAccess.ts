@@ -5,10 +5,15 @@ import IDockerProject from '../models/interface/IDockerProject';
 import { deserializeFolderName, serializeFolderName } from '../shared/utils/StringUtilities';
 import NotFoundError from '../errors/NotFoundError';
 import AlreadyExistsError from '../errors/AlreadyExistsError';
-import { createProjectYaml, getProjectYaml } from './YamlDataAccess';
+import { createProjectYaml, getProjectYaml, renameProjectYaml } from './YamlDataAccess';
 import IDockerProjectSummary from '../models/interface/IDockerProjectSummary';
+import { Logger } from '../shared/Logger';
+
+const logger = Logger.getInstance();
 
 function getAllProject(): IDockerProjectSummary[] {
+
+    logger.info('Starting to fetch all Docker projects');
     const results: IDockerProjectSummary[] = [];
     const folders = getAllFilesFolderInDirectory()
     folders.forEach((folder) => {
@@ -17,55 +22,105 @@ function getAllProject(): IDockerProjectSummary[] {
                 name: deserializeFolderName(folder),
                 folderName: folder
             }
+            logger.info(`Found Docker project: ${dockerProject.name} in folder: ${folder}`);
             results.push(dockerProject)
+        } else {
+            logger.info(`No Docker Compose file found in folder: ${folder}`);
         }
     })
+
+    logger.info(`Completed fetching Docker projects. Total found: ${results.length}`);
     return results;
 };
 
 function getProject(projectFolder: string): IDockerProject {
+    logger.info(`Attempting to retrieve project from folder: ${projectFolder}`);
     if (hasDockerComposeFile(projectFolder)) {
         const dockerProject: IDockerProject = {
             name: deserializeFolderName(projectFolder),
             folderName: projectFolder,
             dockerCompose: getProjectYaml(`${BASE_DIR}/${projectFolder}/docker-compose.yml`)
         }
+        logger.info(`Successfully retrieved project: ${dockerProject.name} from folder: ${projectFolder}`);
         return dockerProject;
     }
+    logger.error(`Docker Compose file not found in folder: ${projectFolder}`);
     throw new NotFoundError("Folder not found.");
 };
 
 function newProject(projectName: string): boolean {
     const serializedProjectName = serializeFolderName(projectName);
-    if (!fs.existsSync(`${BASE_DIR}/${serializedProjectName}`)) {
+    const projectPath = `${BASE_DIR}/${serializedProjectName}`;
+
+    logger.info(`Attempting to create a new project: ${projectName}`);
+
+    if (!fs.existsSync(projectPath)) {
         try {
-            fs.mkdirSync(`${BASE_DIR}/${serializedProjectName}`, { recursive: true });
-            console.log(`Folder created at ${BASE_DIR}/${serializedProjectName}`);
+            fs.mkdirSync(projectPath, { recursive: true });
             createProjectYaml(serializedProjectName);
+            logger.info(`Successfully created project: ${projectName} at path: ${projectPath}`);
         } catch (err) {
+            logger.error(`Error creating project: ${err}`);
             throw ('Error creating Project');
         }
         return true;
     }
+    logger.warn(`Project already exists: ${projectName}`);
     throw new AlreadyExistsError("Project already exist.");
 };
+
+function updateProjectName(projectName: string, newProjectName: string) {
+    const serializedProjectName = serializeFolderName(projectName);
+    const serializedNewProjectName = serializeFolderName(newProjectName);
+    const projectPath = `${BASE_DIR}/${serializedProjectName}`;
+    const newProjectPath = `${BASE_DIR}/${serializedNewProjectName}`;
+
+    logger.info(`Attempting to rename project from ${projectName} to ${newProjectName}`);
+
+    if (fs.existsSync(projectPath)) {
+        if (fs.existsSync(newProjectPath)) {
+            logger.warn(`New project name already exists: ${newProjectName}`);
+            throw new AlreadyExistsError("Project name already exists.");
+        }
+
+        try {
+            fs.renameSync(projectPath, newProjectPath);
+            renameProjectYaml(serializedProjectName, serializedNewProjectName);
+            logger.info(`Successfully renamed project from ${projectName} to ${newProjectName}`);
+            return true;
+        } catch (err) {
+            logger.error(`Error renaming project: ${err}`);
+            throw new Error('Error renaming Project');
+        }
+    }
+
+    logger.error(`Project not found for renaming: ${projectName}`);
+    throw new Error('Project not found.');
+}
 
 function deleteProject() { }
 function updateProject() { }
 
+
 // Private Methods
 function hasDockerComposeFile(projectFolder: string): boolean {
-    if (fs.existsSync(`${BASE_DIR}/${projectFolder}`)) {
-        const stats = fs.statSync(`${BASE_DIR}/${projectFolder}`);
+    const projectPath = `${BASE_DIR}/${projectFolder}`;
+
+    logger.info(`Checking for Docker Compose file in folder: ${projectPath}`);
+
+    if (fs.existsSync(projectPath)) {
+        const stats = fs.statSync(projectPath);
         if (stats.isDirectory()) {
-            const files = getAllFilesFolderInDirectory(`${BASE_DIR}/${projectFolder}`);
+            const files = getAllFilesFolderInDirectory(projectPath);
             return files.includes('docker-compose.yml')
         } else {
             return false;
         }
     }
+
+    logger.error(`Folder not found: ${projectPath}`);
     throw new NotFoundError("Folder not found.");
 }
 
 
-export { getAllProject, getProject, newProject };
+export { getAllProject, getProject, newProject, updateProjectName };

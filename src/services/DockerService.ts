@@ -12,7 +12,7 @@ async function getAllServiceStatus() {
         // List all containers (both running and stopped)
         const containers = await docker.listContainers({ all: true });
 
-        return allService.map((service) => {
+        return allService.filter(x => x.container_name).map((service) => {
             const container = containers.find(
                 (container) => container.Names[0].replace(/^\//, '') === service.container_name
             );

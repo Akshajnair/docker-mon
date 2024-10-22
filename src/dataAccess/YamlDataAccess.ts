@@ -30,4 +30,10 @@ function createProjectYaml(projectFolderName: string): void {
     fs.writeFileSync(`${BASE_DIR}/${projectFolderName}/docker-compose.yml`, yamlStr, 'utf8');
 };
 
-export { getProjectYaml, updateProjectYaml, createProjectYaml }
+function renameProjectYaml(projectFolderName: string, projectFolderNewName: string): void {
+    // const newDockerCompose = new DockerCompose({});
+    // const yamlStr = yaml.dump(newDockerCompose);
+    // fs.writeFileSync(`${BASE_DIR}/${projectFolderName}/docker-compose.yml`, yamlStr, 'utf8');
+};
+
+export { getProjectYaml, updateProjectYaml, createProjectYaml, renameProjectYaml }

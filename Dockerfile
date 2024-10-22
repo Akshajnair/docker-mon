@@ -16,9 +16,10 @@ COPY frontend/ ./frontend
 RUN npm ci
 RUN cd frontend && npm ci
 
-# Build TypeScript files
-RUN npm run build
-RUN cd frontend && npm run build
+# If production, build the TypeScript files and React frontend
+ARG NODE_ENV
+RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
+RUN if [ "$NODE_ENV" = "production" ]; then cd frontend && npm run build; fi
 
 # Expose the port specified in the .env file or default
 EXPOSE ${PORT}

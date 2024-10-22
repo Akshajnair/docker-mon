@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Logger } from '../shared/Logger';
 
-const logger = new Logger();
+const logger = Logger.getInstance();
 
 export const loggerMiddleware = (req: Request, res: Response, next: NextFunction) => {
     const start = Date.now(); // Track time to calculate response duration later
