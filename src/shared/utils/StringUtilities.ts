@@ -1,3 +1,5 @@
+import InvalidInputError from "../../errors/InvalidInputError";
+
 /**
  * Serializes a folder nameby replacing spaces with dashes ('-').
  * 
@@ -5,6 +7,9 @@
  * @returns A string with spaces replaced by dashes (e.g. "hi-my-name-is-yolo").
  */
 function serializeFolderName(input: string): string {
+    if (!input || typeof input !== 'string') {
+        throw new InvalidInputError('Invalid folder name provided');
+    }
     return input.split(' ').join('-');
 }
 
@@ -15,6 +20,9 @@ function serializeFolderName(input: string): string {
  * @returns A string with dashes replaced by spaces (e.g. "hi my name is yolo").
  */
 function deserializeFolderName(input: string): string {
+    if (!input || typeof input !== 'string') {
+        throw new InvalidInputError('Invalid folder name provided');
+    }
     return input.split('-').join(' ');
 }
 

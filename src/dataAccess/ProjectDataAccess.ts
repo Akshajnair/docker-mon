@@ -5,9 +5,10 @@ import IDockerProject from '../models/interface/IDockerProject';
 import { deserializeFolderName, serializeFolderName } from '../shared/utils/StringUtilities';
 import NotFoundError from '../errors/NotFoundError';
 import AlreadyExistsError from '../errors/AlreadyExistsError';
-import { createProjectYaml, getProjectYaml, renameProjectYaml } from './YamlDataAccess';
+import { createProjectYaml, getProjectYaml, renameProjectYaml, updateProjectYaml } from './YamlDataAccess';
 import IDockerProjectSummary from '../models/interface/IDockerProjectSummary';
 import { Logger } from '../shared/Logger';
+import IDockerCompose from '../models/interface/IDockerCompose';
 
 const logger = Logger.getInstance();
 
@@ -70,9 +71,8 @@ function newProject(projectName: string): boolean {
 };
 
 function updateProjectName(projectName: string, newProjectName: string) {
-    const serializedProjectName = serializeFolderName(projectName);
     const serializedNewProjectName = serializeFolderName(newProjectName);
-    const projectPath = `${BASE_DIR}/${serializedProjectName}`;
+    const projectPath = `${BASE_DIR}/${projectName}`;
     const newProjectPath = `${BASE_DIR}/${serializedNewProjectName}`;
 
     logger.info(`Attempting to rename project from ${projectName} to ${newProjectName}`);
@@ -85,7 +85,7 @@ function updateProjectName(projectName: string, newProjectName: string) {
 
         try {
             fs.renameSync(projectPath, newProjectPath);
-            renameProjectYaml(serializedProjectName, serializedNewProjectName);
+            renameProjectYaml(serializedNewProjectName);
             logger.info(`Successfully renamed project from ${projectName} to ${newProjectName}`);
             return true;
         } catch (err) {
@@ -99,7 +99,22 @@ function updateProjectName(projectName: string, newProjectName: string) {
 }
 
 function deleteProject() { }
-function updateProject() { }
+function updateProjectDockerCompose(projectFolderName: string, projectDockerCompose: IDockerCompose) {
+    const projectYamlPath = `${BASE_DIR}/${projectFolderName}/docker-compose.yml`;
+
+    logger.info(`Attempting to update docker-compose.yml for project: ${projectFolderName}`);
+
+    try {
+        // Update the YAML file with the new Docker Compose structure
+        updateProjectYaml(projectYamlPath, projectDockerCompose);
+
+        logger.info(`Successfully updated docker-compose.yml for project: ${projectFolderName}`);
+        return true;
+    } catch (error) {
+        logger.error(`Error updating docker-compose.yml for project ${projectFolderName}: ${error}`);
+        throw error; // Rethrow the error for further handling
+    }
+}
 
 
 // Private Methods
@@ -123,4 +138,4 @@ function hasDockerComposeFile(projectFolder: string): boolean {
 }
 
 
-export { getAllProject, getProject, newProject, updateProjectName };
+export { getAllProject, getProject, newProject, updateProjectName, updateProjectDockerCompose };

@@ -1,4 +1,5 @@
-import { getAllProject, getProject, newProject, updateProjectName } from "../dataAccess/ProjectDataAccess"
+import { getAllProject, getProject, newProject, updateProjectDockerCompose, updateProjectName } from "../dataAccess/ProjectDataAccess"
+import IDockerCompose from "../models/interface/IDockerCompose"
 
 function getAllProjectList() {
     return getAllProject()
@@ -16,4 +17,8 @@ function renameProject(projectName: string, newProjectName: string) {
     return updateProjectName(projectName, newProjectName)
 }
 
-export { getAllProjectList, getProjectDetails, addProject, renameProject }
+function updateProject(projectName: string, projectDockerCompose: IDockerCompose) {
+    return updateProjectDockerCompose(projectName, projectDockerCompose)
+}
+
+export { getAllProjectList, getProjectDetails, addProject, renameProject, updateProject }

@@ -1,7 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { addProject, getAllProjectList, getProjectDetails, renameProject } from '../services/ProjectService';
+import { addProject, getAllProjectList, getProjectDetails, renameProject, updateProject } from '../services/ProjectService';
 import createProjectValidator from '../validators/CreateProjectValidator';
 import renameProjectValidator from '../validators/RenameProjectValidator';
+import updateProjectValidator from '../validators/UpdateProjectValidator';
 
 const router = Router();
 
@@ -24,10 +25,19 @@ router.post('/create', createProjectValidator, (req: Request, res: Response) => 
   }
 });
 
-router.post('/rename', renameProjectValidator, (req: Request, res: Response) => {
-  const { projectName, newProjectName } = req.body;
-  if (renameProject(projectName, newProjectName)) {
+router.post('/:folderName/rename', renameProjectValidator, (req: Request, res: Response) => {
+  const { newProjectName } = req.body;
+  const { folderName } = req.params;
+  if (renameProject(folderName, newProjectName)) {
     res.status(201).json("Project Renamed successfully.")
+  }
+});
+
+router.put('/:folderName', updateProjectValidator, (req: Request, res: Response) => {
+  const { projectDockerCompose } = req.body;
+  const { folderName } = req.params;
+  if (updateProject(folderName, projectDockerCompose)) {
+    res.status(201).json("Project Updated successfully.")
   }
 });
 
