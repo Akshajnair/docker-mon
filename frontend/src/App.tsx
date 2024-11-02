@@ -9,10 +9,15 @@ import {
   // extendTheme
 } from '@chakra-ui/react';
 import initialTheme from './theme/theme'; //  { themeGreen }
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { startDockerStatusPolling } from 'services/DockerService';
 // Chakra imports
 
 export default function Main() {
+  useEffect(() => {
+    startDockerStatusPolling();
+  }, []);
+
   // eslint-disable-next-line
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
   return (
