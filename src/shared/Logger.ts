@@ -50,7 +50,7 @@ export class Logger {
     // Log Info
     info(info: string): void {
         const message = `[INFO] ${new Date().toISOString()} | Info: ${info}`;
-        this.log(message);
+        // this.log(message);
     }
 
 

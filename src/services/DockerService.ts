@@ -1,3 +1,4 @@
+import { exec } from "child_process";
 import { getAllProject } from "../dataAccess/ProjectDataAccess";
 import DockerError from "../errors/DockerError";
 import IDockerServiceStatus from "../models/interface/IDockerServiceStatus";
@@ -5,6 +6,8 @@ import { ServiceConfig } from "../models/ServiceConfig";
 import { Logger } from "../shared/Logger";
 import { getProjectDetails } from "./ProjectService";
 import Docker from "dockerode";
+import si from "systeminformation";
+import ContainerStateEnum from "../models/enums/ContainerStateEnum";
 
 const logger = Logger.getInstance();
 
@@ -29,7 +32,8 @@ async function getAllServiceStatus(): Promise<IDockerServiceStatus[]> {
         const serviceStatus: IDockerServiceStatus = {
           name: service.container_name || "",
           containerId: container?.Id || "",
-          state: container?.State || "Stopped",
+          state:
+            container?.State || ContainerStateEnum[ContainerStateEnum.exited],
           status: container?.Status || "Stopped",
         };
 
@@ -105,6 +109,90 @@ async function getContainerStats(containerId: string) {
   }
 }
 
+async function getBasicSystemInfo() {
+  try {
+    // Get memory data
+    const memoryData = await si.mem();
+    const totalMemory = (memoryData.total / (1024 * 1024 * 1024)).toFixed(2); // in GB
+    const usedMemory = (
+      (memoryData.total - memoryData.available) /
+      (1024 * 1024 * 1024)
+    ).toFixed(2); // in GB
+    const freeMemory = (memoryData.available / (1024 * 1024 * 1024)).toFixed(2); // in GB
+
+    // Get CPU data
+    const cpuLoad = await si.currentLoad();
+    const cpuUsage = cpuLoad.currentLoad.toFixed(2); // in percentage
+
+    // Get storage data
+    // const diskData = await si.fsSize();
+    // const storageUsage = diskData.map((disk: any) => ({
+    //   fs: disk.fs,
+    //   total: (disk.size / (1024 * 1024 * 1024)).toFixed(2), // in GB
+    //   used: (disk.used / (1024 * 1024 * 1024)).toFixed(2), // in GB
+    //   usage: `${disk.use.toFixed(2)}%`,
+    // }));
+    const fsSizes = await si.fsSize();
+
+    // Get detailed mount info using 'df -h'
+    exec("df -h", (error, stdout) => {
+      if (error) {
+        console.error("Error executing df command:", error);
+        return;
+      }
+      console.log(stdout);
+      const lines = stdout.split("\n").slice(1); // Skip the header line
+      const parsedData = lines
+        .map((line) => {
+          const parts = line.split(/\s+/);
+          if (parts.length >= 6) {
+            return {
+              fs: parts[0],
+              size: parts[1],
+              used: parts[2],
+              available: parts[3],
+              usage: parts[4],
+              mountedOn: parts[5],
+            };
+          }
+          return null;
+        })
+        .filter(Boolean);
+      console.log("Filtered mount information:", parsedData);
+    });
+    const storageUsage = fsSizes.map((fs) => ({
+      mountPoint: fs.fs,
+      total: (fs.size / 1024 ** 3).toFixed(2) + " GB",
+      used: (fs.used / 1024 ** 3).toFixed(2) + " GB",
+      usage: `${fs.use.toFixed(2)}%`,
+    }));
+
+    // Get network data
+    const networkStats = await si.networkStats();
+    const networkUsage = networkStats.map((net: any) => ({
+      iface: net.iface,
+      rx: (net.rx_sec / (1024 * 1024)).toFixed(2), // in MB/sec
+      tx: (net.tx_sec / (1024 * 1024)).toFixed(2), // in MB/sec
+    }));
+
+    return {
+      memory: {
+        total: `${totalMemory} GB`,
+        used: `${usedMemory} GB`,
+        free: `${freeMemory} GB`,
+      },
+      cpu: {
+        usage: `${cpuUsage}%`,
+      },
+      storage: storageUsage,
+      network: networkUsage,
+    };
+  } catch (error) {
+    console.error("Error fetching system information:", error);
+    throw new Error("Failed to get system information");
+  }
+}
+
 function calculateCpuUsage(stats: any): number {
   const cpuDelta =
     stats.cpu_stats.cpu_usage.total_usage -
@@ -120,4 +208,9 @@ function calculateCpuUsage(stats: any): number {
   return 0;
 }
 
-export { getAllServiceStatus, getAllServices, getContainerStats };
+export {
+  getAllServiceStatus,
+  getAllServices,
+  getContainerStats,
+  getBasicSystemInfo,
+};

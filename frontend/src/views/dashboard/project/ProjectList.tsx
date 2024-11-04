@@ -14,9 +14,12 @@ import Loader from 'components/loader/Loader';
 import Card from 'components/card/Card';
 import { capitalizeAfterSpace } from 'shared/utils/StringUtils';
 import Status from 'components/status/Status';
+import ProjectDetails from './ProjectDetails';
+import { useState } from 'react';
 
 export default function ProjectList() {
   const { data: projects, error, isLoading } = useGetProjectsQuery();
+  const [openProjectFolderName, setopenProjectFolderName] = useState('');
   const textColor = useColorModeValue('secondaryGray.900', 'white');
 
   return (
@@ -43,7 +46,14 @@ export default function ProjectList() {
             error={error}
             errorMsg="Oops! could not load Projects."
           >
-            <Accordion allowToggle>
+            <Accordion
+              allowToggle
+              onChange={(index) => {
+                if (typeof index === 'number' && index >= 0)
+                  setopenProjectFolderName(projects?.[index].folderName);
+                else setopenProjectFolderName('');
+              }}
+            >
               {projects?.map((project) => {
                 return (
                   <AccordionItem key={project.folderName}>
@@ -56,8 +66,11 @@ export default function ProjectList() {
                       </AccordionButton>
                     </h2>
                     <AccordionPanel pb={4}>
-                      This is the content of Section 1. You can put any
-                      information here.
+                      {openProjectFolderName ? (
+                        <ProjectDetails
+                          projectFolderName={openProjectFolderName}
+                        />
+                      ) : null}
                     </AccordionPanel>
                   </AccordionItem>
                 );

@@ -2,6 +2,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { API_BASE_URL } from 'shared/Constants';
 import IDockerProjectSummary from "@models/interface/IDockerProjectSummary"
+import IDockerProject from "@models/interface/IDockerProject"
 
 export const projectsApi = createApi({
     reducerPath: 'projectsApi',  // Unique name for this API slice
@@ -10,7 +11,7 @@ export const projectsApi = createApi({
         getProjects: builder.query<IDockerProjectSummary[], void>({
             query: () => 'project',
         }),
-        getProjectDetails: builder.query({
+        getProjectDetails: builder.query<IDockerProject, string>({
             query: (folderName: string) => `project/${folderName}`,
         }),
         createProject: builder.mutation({
