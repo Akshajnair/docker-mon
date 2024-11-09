@@ -9,7 +9,7 @@ import {
 
 // Admin Imports
 import Dashboard from 'views/dashboard/index';
-import Default from 'views/admin/default';
+import Default from 'views/dashboard';
 import NFTMarketplace from 'views/admin/marketplace';
 import Profile from 'views/admin/profile';
 import DataTables from 'views/admin/dataTables';
@@ -21,21 +21,21 @@ import SignInCentered from 'views/auth/signIn';
 const routes = [
   {
     name: 'Dashboard',
-    layout: '/admin',
+    layout: '/',
     path: '/dashboard',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: <Dashboard />,
   },
   {
     name: 'Default',
-    layout: '/admin',
+    layout: '/',
     path: '/default',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: <Default />,
   },
   {
     name: 'NFT Marketplace',
-    layout: '/admin',
+    layout: '/',
     path: '/nft-marketplace',
     icon: (
       <Icon
@@ -50,14 +50,14 @@ const routes = [
   },
   {
     name: 'Data Tables',
-    layout: '/admin',
+    layout: '/',
     icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
     path: '/data-tables',
     component: <DataTables />,
   },
   {
     name: 'Profile',
-    layout: '/admin',
+    layout: '/',
     path: '/profile',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: <Profile />,
@@ -70,7 +70,7 @@ const routes = [
     component: <SignInCentered />,
   },
   {
-    name: 'RTL Admin',
+    name: 'RTL ',
     layout: '/rtl',
     path: '/rtl-default',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,

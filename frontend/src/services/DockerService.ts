@@ -19,14 +19,6 @@ function getProjectStatus(
   const state = containers.map(
     (container) => status.find((state) => state.name === container)?.state,
   );
-  // if (containers.includes('vscode'))
-  //   console.log(
-  //     containers,
-  //     state,
-  //     state[0],
-  //     ContainerStateEnum[ContainerStateEnum.running],
-  //     state[0] === ContainerStateEnum.running,
-  //   );
   if (
     state.every((x) => (x as ContainerStateEnum) === ContainerStateEnum.running)
   ) {
@@ -44,17 +36,20 @@ function getProjectStatus(
   }
 }
 
-function getContainerStatus(
-  container: string,
-  status: IDockerServiceStatus[],
-): ContainerStateEnum {
-  console.log(
-    container,
-    status.find((state) => state.name === container)?.state,
-  );
-  return <ContainerStateEnum>(
-    (status.find((state) => state.name === container)?.state as unknown)
-  );
+function getContainerState(status: IDockerServiceStatus): ContainerStateEnum {
+  return <ContainerStateEnum>(status.state as unknown);
 }
 
-export { startDockerStatusPolling, getProjectStatus, getContainerStatus };
+function getContainerCompleteStatus(
+  container: string,
+  status: IDockerServiceStatus[],
+): IDockerServiceStatus {
+  return status.find((state) => state.name === container);
+}
+
+export {
+  startDockerStatusPolling,
+  getProjectStatus,
+  getContainerState,
+  getContainerCompleteStatus,
+};

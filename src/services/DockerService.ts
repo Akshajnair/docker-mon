@@ -8,6 +8,7 @@ import { getProjectDetails } from "./ProjectService";
 import Docker from "dockerode";
 import si from "systeminformation";
 import ContainerStateEnum from "../models/enums/ContainerStateEnum";
+import NotFoundError from "../errors/NotFoundError";
 
 const logger = Logger.getInstance();
 
@@ -106,6 +107,56 @@ async function getContainerStats(containerId: string) {
       `Failed to retrieve stats for container ${containerId}: ${error}`
     );
     throw new Error("Failed to retrieve container stats");
+  }
+}
+
+export async function stopContainer(containerId: string): Promise<void> {
+  logger.info(`Attempting to stop container with ID: ${containerId}`);
+  const docker = new Docker();
+  try {
+      const container = docker.getContainer(containerId);
+
+      // Check if the container exists
+      const containerInfo = await container.inspect();
+      if (!containerInfo) {
+          throw new NotFoundError(`Container with ID ${containerId} not found`);
+      }
+
+      // Stop the container
+      await container.stop();
+      logger.info(`Successfully stopped container with ID: ${containerId}`);
+  } catch (error: any) {
+      if (error.statusCode === 404) {
+          logger.error(`Container with ID ${containerId} not found`);
+          throw new NotFoundError(`Container with ID ${containerId} not found`);
+      }
+      logger.error(`Error stopping container with ID ${containerId}: ${error.message}`);
+      throw new Error(`Failed to stop container with ID ${containerId}`);
+  }
+}
+
+export async function startContainer(containerId: string): Promise<void> {
+  logger.info(`Attempting to start container with ID: ${containerId}`);
+  const docker = new Docker();
+  try {
+      const container = docker.getContainer(containerId);
+
+      // Check if the container exists
+      const containerInfo = await container.inspect();
+      if (!containerInfo) {
+          throw new NotFoundError(`Container with ID ${containerId} not found`);
+      }
+
+      // Start the container
+      await container.start();
+      logger.info(`Successfully started container with ID: ${containerId}`);
+  } catch (error: any) {
+      if (error.statusCode === 404) {
+          logger.error(`Container with ID ${containerId} not found`);
+          throw new NotFoundError(`Container with ID ${containerId} not found`);
+      }
+      logger.error(`Error starting container with ID ${containerId}: ${error.message}`);
+      throw new Error(`Failed to start container with ID ${containerId}`);
   }
 }
 

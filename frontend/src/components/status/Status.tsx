@@ -4,15 +4,16 @@ import IDockerProjectSummary from '@models/interface/IDockerProjectSummary';
 import ContainerStateEnum from 'shared/enums/ContainerStateEnum';
 import React from 'react';
 import { useGetStatusQuery } from 'reducers/api/DockerApiReducer';
-import { getContainerStatus, getProjectStatus } from 'services/DockerService';
+import {
+  getContainerCompleteStatus,
+  getContainerState,
+  getProjectStatus,
+} from 'services/DockerService';
 import ProjectStateEnum from 'shared/enums/ProjectStateEnums';
 
 type StatusProps = {
   project?: IDockerProjectSummary;
   containerName?: string;
-  small?: boolean;
-  state?: string;
-  displayText?: string;
 };
 
 function Status(props: StatusProps) {
@@ -31,15 +32,18 @@ function Status(props: StatusProps) {
     dead: 'red',
   };
 
-  let state = props.state;
+  let state = 'stopped';
+  let containerStatus;
+  let displayText = '';
 
   if ('project' in props && statuses) {
     state =
       ProjectStateEnum[getProjectStatus(props.project.containers, statuses)];
   }
   if ('containerName' in props && statuses) {
-    state =
-      ContainerStateEnum[getContainerStatus(props.containerName, statuses)];
+    const status = getContainerCompleteStatus(props.containerName, statuses);
+    state = ContainerStateEnum[getContainerState(status)];
+    displayText = status.status;
   }
   let color = colorsMap[state];
 
@@ -82,11 +86,9 @@ function Status(props: StatusProps) {
         </>
       ) : null}
 
-      {!props.small ? (
-        <Tag colorScheme={color} borderRadius="full" px={3}>
-          {props.displayText || state || 'unknown'}
-        </Tag>
-      ) : null}
+      <Tag colorScheme={color} borderRadius="full" px={3}>
+        {displayText || state || 'unknown'}
+      </Tag>
     </Flex>
   );
 }

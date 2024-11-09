@@ -1,45 +1,75 @@
 // Chakra imports
-import { Flex, FormLabel, Input, Text, useColorModeValue } from '@chakra-ui/react';
-// Custom components
+import {
+  Flex,
+  FormLabel,
+  Input,
+  Text,
+  useColorModeValue,
+  InputProps,
+  FlexProps,
+} from '@chakra-ui/react';
+import { ReactNode } from 'react';
 
-export default function Default(props: {
-	id: string;
-	label: string;
-	extra: JSX.Element;
-	placeholder: string;
-	type: string;
-	mb: any;
-}) {
-	const { id, label, extra, placeholder, type, mb, ...rest } = props;
-	// Chakra Color Mode
-	const textColorPrimary = useColorModeValue('secondaryGray.900', 'white');
+interface InputFieldProps extends InputProps {
+  id: string;
+  label: string;
+  extra?: ReactNode;
+  placeholder?: string;
+  mb?: FlexProps['mb'];
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+  className?: string;
+}
 
-	return (
-		<Flex direction='column' mb={mb ? mb : '30px'}>
-			<FormLabel
-				display='flex'
-				ms='10px'
-				htmlFor={id}
-				fontSize='sm'
-				color={textColorPrimary}
-				fontWeight='bold'
-				_hover={{ cursor: 'pointer' }}>
-				{label}
-				<Text fontSize='sm' fontWeight='400' ms='2px'>
-					{extra}
-				</Text>
-			</FormLabel>
-			<Input
-				{...rest}
-				type={type}
-				id={id}
-				fontWeight='500'
-				variant='main'
-				placeholder={placeholder}
-				_placeholder={{ fontWeight: '400', color: 'secondaryGray.600' }}
-				h='44px'
-				maxH='44px'
-			/>
-		</Flex>
-	);
+export default function InputField({
+  id,
+  label,
+  extra,
+  placeholder = '',
+  type = 'text',
+  mb = '20px',
+  value,
+  onChange,
+  disabled = false,
+  className = '',
+  ...rest
+}: InputFieldProps) {
+  // Chakra Color Mode
+  const textColorPrimary = useColorModeValue('secondaryGray.900', 'white');
+
+  return (
+    <Flex direction="column" mb={mb} className={className}>
+      <FormLabel
+        display="flex"
+        ms="10px"
+        htmlFor={id}
+        fontSize="sm"
+        color={textColorPrimary}
+        fontWeight="bold"
+        _hover={{ cursor: 'pointer' }}
+      >
+        {label}
+        {extra && (
+          <Text fontSize="sm" fontWeight="400" ms="2px">
+            {extra}
+          </Text>
+        )}
+      </FormLabel>
+      <Input
+        id={id}
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        fontWeight="500"
+        variant="main"
+        _placeholder={{ fontWeight: '400', color: 'secondaryGray.600' }}
+        h="44px"
+        maxH="44px"
+        {...rest} // Spread any other input props
+      />
+    </Flex>
+  );
 }

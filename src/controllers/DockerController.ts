@@ -4,6 +4,8 @@ import {
   getAllServiceStatus,
   getBasicSystemInfo,
   getContainerStats,
+  startContainer,
+  stopContainer,
 } from "../services/DockerService";
 
 const router = Router();
@@ -44,6 +46,32 @@ router.get(
       const { containerId } = req.params;
       const containerResource = await getContainerStats(containerId);
       res.json(containerResource);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/:containerId/stop",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { containerId } = req.params;
+      await stopContainer(containerId);
+      res.json(true);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+router.post(
+  "/:containerId/start",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { containerId } = req.params;
+      await startContainer(containerId);
+      res.json(true);
     } catch (err) {
       next(err);
     }
